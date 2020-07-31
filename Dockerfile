@@ -82,5 +82,5 @@ CMD cp apiconfig.py userapiconfig.py &&                                         
     sed -i "s|\"out_bind\": \"\"|\"out_bind\": \"${OUT_BIND}\"|"                   /root/shadowsocks/user-config.json && \
     sed -i "s|\"redirect\": \"\"|\"redirect\": \"${REDIRECT}\"|"                   /root/shadowsocks/user-config.json && \
     sed -i "s|\"fast_open\": true|\"fast_open\": ${FAST_OPEN}|"                    /root/shadowsocks/user-config.json && \
-    echo -e "${DNS1}\n${DNS2}\n" >                                               /root/shadowsocks/dns.conf         && \
+    echo -e "${DNS1}\n${DNS2}\n" >                                                 /root/shadowsocks/dns.conf         && \
     python /root/shadowsocks/server.py
