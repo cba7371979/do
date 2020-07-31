@@ -1,8 +1,9 @@
 FROM alpine:3.11
 
+RUN dns_1=$(cat /etc/resolv.conf|grep nameserver|awk 'NR==1{print $2}');dns_2=$(cat /etc/resolv.conf|grep nameserver|awk 'NR==2{print $2}')
 ENV NODE_ID=0                            \
-    DNS_1=8.8.8.8                        \
-    DNS_2=1.0.0.1                        \
+    DNS1=$dns_1                          \
+    DNS2=$dns_2                          \
     SPEEDTEST=0                          \
     CLOUDSAFE=0                          \
     AUTOEXEC=0                           \
@@ -59,7 +60,27 @@ RUN apk add --no-cache                           \
 
 WORKDIR /root/shadowsocks
 
-CMD envsubst < apiconfig.py > userapiconfig.py && \
-    envsubst < config.json > user-config.json  && \
-    if [ $NS1 != 8.8.4.4 -a $NS2 = 1.0.0.1 ];then echo -e "$NS1 53">/root/shadowsocks/dns.conf ; else echo -e "$NS1 53\n$NS2 53">/root/shadowsocks/dns.conf ; fi && \
+CMD cp apiconfig.py userapiconfig.py &&                                            cp   config.json  user-config.json && \
+    sed -i "s|NODE_ID = 0|NODE_ID = ${NODE_ID}|"                                   /root/shadowsocks/userapiconfig.py && \
+    sed -i "s|SPEEDTEST = 6|SPEEDTEST = ${SPEEDTEST}|"                             /root/shadowsocks/userapiconfig.py && \
+    sed -i "s|CLOUDSAFE = 1|CLOUDSAFE = ${CLOUDSAFE}|"                             /root/shadowsocks/userapiconfig.py && \
+    sed -i "s|AUTOEXEC = 0|AUTOEXEC = ${AUTOEXEC}|"                                /root/shadowsocks/userapiconfig.py && \
+    sed -i "s|ANTISSATTACK = 0|ANTISSATTACK = ${ANTISSATTACK}|"                    /root/shadowsocks/userapiconfig.py && \
+    sed -i "s|OFFSET = 0|OFFSET = ${OFFSET}|"                                      /root/shadowsocks/userapiconfig.py && \
+    sed -i "s|MU_SUFFIX = \'zhaoj.in\'|MU_SUFFIX = \'${MU_SUFFIX}\'|"              /root/shadowsocks/userapiconfig.py && \
+    sed -i "s|MU_REGEX = \'%5m%id.%suffix\'|MU_REGEX = \'${MU_REGEX}\'|"           /root/shadowsocks/userapiconfig.py && \
+    sed -i "s|API_INTERFACE = \'modwebapi\'|API_INTERFACE = \'${API_INTERFACE}\'|" /root/shadowsocks/userapiconfig.py && \
+    sed -i "s|WEBAPI_URL = \'https://zhaoj.in\'|WEBAPI_URL = \'${WEBAPI_URL}\'|"   /root/shadowsocks/userapiconfig.py && \
+    sed -i "s|WEBAPI_TOKEN = \'glzjin\'|WEBAPI_TOKEN = \'${WEBAPI_TOKEN}\'|"       /root/shadowsocks/userapiconfig.py && \
+    sed -i "s|MYSQL_HOST = \'127.0.0.1\'|MYSQL_HOST = \'${MYSQL_HOST}\'|"          /root/shadowsocks/userapiconfig.py && \
+    sed -i "s|MYSQL_PORT = 3306|MYSQL_PORT = ${MYSQL_PORT}|"                       /root/shadowsocks/userapiconfig.py && \
+    sed -i "s|MYSQL_USER = \'ss\'|MYSQL_USER = \'${MYSQL_USER}\'|"                 /root/shadowsocks/userapiconfig.py && \
+    sed -i "s|MYSQL_PASS = \'ss\'|MYSQL_PASS = \'${MYSQL_PASS}\'|"                 /root/shadowsocks/userapiconfig.py && \
+    sed -i "s|MYSQL_DB = \'shadowsocks\'|MYSQL_DB = \'${MYSQL_DB}\'|"              /root/shadowsocks/userapiconfig.py && \
+    sed -i "s|\"server\": \"0.0.0.0\"|\"server\": \"${SERVER}\"|"                  /root/shadowsocks/user-config.json && \
+    sed -i "s|\"server_ipv6\": \"::\"|\"server_ipv6\": \"${SERVER_IPV6}\"|"        /root/shadowsocks/user-config.json && \
+    sed -i "s|\"out_bind\": \"\"|\"out_bind\": \"${OUT_BIND}\"|"                   /root/shadowsocks/user-config.json && \
+    sed -i "s|\"redirect\": \"\"|\"redirect\": \"${REDIRECT}\"|"                   /root/shadowsocks/user-config.json && \
+    sed -i "s|\"fast_open\": true|\"fast_open\": ${FAST_OPEN}|"                    /root/shadowsocks/user-config.json && \
+    echo -e "${DNS1}\n${DNS2}\n" >                                               /root/shadowsocks/dns.conf         && \
     python /root/shadowsocks/server.py
